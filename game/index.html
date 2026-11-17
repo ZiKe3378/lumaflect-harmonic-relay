@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lumaflect: Harmonic Relay</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Top HUD Bar -->
+    <header id="hud" class="hud-layer hidden">
+      <div class="hud-group hud-left">
+        <div class="stat-badge">
+          <span class="stat-label">INTEGRITY</span>
+          <div class="health-bar-container">
+            <div id="integrity-bar" class="health-bar-fill"></div>
+          </div>
+          <span id="integrity-value" class="stat-val">100%</span>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-label">ENERGY</span>
+          <div class="energy-bar-container">
+            <div id="energy-bar" class="energy-bar-fill"></div>
+          </div>
+          <span id="energy-value" class="stat-val">100%</span>
+        </div>
+      </div>
+
+      <div class="hud-group hud-center">
+        <div class="stat-badge phase-badge">
+          <span class="stat-label">HARMONIC PHASE</span>
+          <span id="wave-value" class="stat-highlight">PHASE 1 / 5</span>
+        </div>
+        <div class="stat-badge polarity-badge">
+          <span class="stat-label">POLARITY</span>
+          <span id="polarity-indicator" class="polarity-tag cyan">CYAN [SPACE]</span>
+        </div>
+      </div>
+
+      <div class="hud-group hud-right">
+        <div class="stat-badge">
+          <span class="stat-label">HARMONIC SCORE</span>
+          <span id="score-value" class="stat-val num">0</span>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-label">CHAIN</span>
+          <span id="multiplier-value" class="stat-val num">x1.0</span>
+        </div>
+        <div class="hud-controls">
+          <button id="btn-sound" class="icon-btn" title="Toggle Sound (M)" aria-label="Toggle Sound">🔊</button>
+          <button id="btn-pause" class="icon-btn" title="Pause Game (P)" aria-label="Pause Game">⏸</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Overlay Screens -->
+    <!-- Title Screen -->
+    <section id="title-screen" class="overlay-screen active">
+      <div class="screen-card">
+        <div class="brand-emblem">
+          <div class="emblem-ring ring-outer"></div>
+          <div class="emblem-ring ring-inner"></div>
+          <div class="emblem-core"></div>
+        </div>
+        <h1 class="game-title">LUMAFLECT</h1>
+        <p class="game-subtitle">HARMONIC RELAY</p>
+
+        <div class="card-intro">
+          <p>Align polar light conduits across celestial nodes. Harmonize radiant energy, cleave discordant anomalies, and reconstruct the Great Harmonic Matrix.</p>
+        </div>
+
+        <div class="quick-guide">
+          <div class="guide-item">
+            <div class="key-badge">WASD / ARROWS / MOUSE</div>
+            <span>Navigate Core Resonator</span>
+          </div>
+          <div class="guide-item">
+            <div class="key-badge">SPACE / LEFT CLICK</div>
+            <span>Toggle Polarity (Cyan ⇄ Amber)</span>
+          </div>
+          <div class="guide-item">
+            <div class="key-badge">SHIFT / RIGHT CLICK</div>
+            <span>Anchor Light Strand between Nodes</span>
+          </div>
+          <div class="guide-item">
+            <div class="key-badge">P / ESC</div>
+            <span>Pause &amp; Resume</span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-start" class="primary-btn pulse-glow">START HARMONIZATION</button>
+          <button id="btn-how-to" class="secondary-btn">FIELD MANUAL</button>
+        </div>
+
+        <div class="card-footer">
+          <span>High Score: <strong id="title-high-score">0</strong></span>
+          <span class="version-tag">Pure Canvas &amp; Web Audio &bull; Offline Desktop</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- How To Play Modal Screen -->
+    <section id="manual-screen" class="overlay-screen hidden">
+      <div class="screen-card manual-card">
+        <h2>FIELD MANUAL &bull; PROTOCOLS</h2>
+        <div class="manual-content">
+          <div class="protocol-section">
+            <h3>1. Resonance Absorption</h3>
+            <p>Nodes emit radiant light pulses in Cyan and Amber waves. When your polarity matches an incoming pulse, absorb it to restore integrity and boost score multiplier.</p>
+          </div>
+          <div class="protocol-section">
+            <h3>2. Strand Linking</h3>
+            <p>Hold near an active node and trigger Strand Anchor to tether nodes together. Closed or linked conduits form protective radiant barriers that vaporize discordant shards.</p>
+          </div>
+          <div class="protocol-section">
+            <h3>3. Polarity Mismatch Hazard</h3>
+            <p>Colliding with pulses of conflicting polarity damages your resonator integrity. Keep vigilance and switch polarities with precision.</p>
+          </div>
+          <div class="protocol-section">
+            <h3>4. Five Harmonic Phases</h3>
+            <p>Survive and stabilize all 5 escalating celestial phases to achieve Harmonic Transcendence.</p>
+          </div>
+        </div>
+        <button id="btn-manual-back" class="primary-btn">RETURN TO MISSION</button>
+      </div>
+    </section>
+
+    <!-- Pause Screen -->
+    <section id="pause-screen" class="overlay-screen hidden">
+      <div class="screen-card compact-card">
+        <h2>TRANSMISSION SUSPENDED</h2>
+        <p>Resonator systems holding position in orbital flux.</p>
+        <div class="button-column">
+          <button id="btn-resume" class="primary-btn">RESUME CONDUIT</button>
+          <button id="btn-restart-pause" class="secondary-btn">RESTART MISSION (R)</button>
+          <button id="btn-quit-pause" class="secondary-btn">TITLE COCKPIT</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Over Screen -->
+    <section id="gameover-screen" class="overlay-screen hidden">
+      <div class="screen-card state-card failure-card">
+        <div class="status-icon failure-icon">&times;</div>
+        <h2 class="status-heading">RESONANCE COLLAPSE</h2>
+        <p class="status-sub">Integrity depleted. Matrix conduit disconnected.</p>
+        
+        <div class="score-summary-grid">
+          <div class="summary-cell">
+            <span class="cell-label">FINAL SCORE</span>
+            <span id="final-score" class="cell-value">0</span>
+          </div>
+          <div class="summary-cell">
+            <span class="cell-label">PHASE REACHED</span>
+            <span id="final-phase" class="cell-value">Phase 1</span>
+          </div>
+          <div class="summary-cell">
+            <span class="cell-label">MAX CHAIN</span>
+            <span id="final-chain" class="cell-value">x1.0</span>
+          </div>
+          <div class="summary-cell">
+            <span class="cell-label">STRANDS ANCHORED</span>
+            <span id="final-strands" class="cell-value">0</span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-restart-dead" class="primary-btn pulse-glow">REINITIALIZE MATRIX (R)</button>
+          <button id="btn-quit-dead" class="secondary-btn">RETURN TO TITLE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Victory Screen -->
+    <section id="victory-screen" class="overlay-screen hidden">
+      <div class="screen-card state-card victory-card">
+        <div class="status-icon victory-icon">&check;</div>
+        <h2 class="status-heading">HARMONIC TRANSCENDENCE</h2>
+        <p class="status-sub">All 5 phases stabilized. The Great Harmonic Matrix is restored!</p>
+
+        <div class="score-summary-grid">
+          <div class="summary-cell">
+            <span class="cell-label">TOTAL SCORE</span>
+            <span id="vic-score" class="cell-value">0</span>
+          </div>
+          <div class="summary-cell">
+            <span class="cell-label">EFFICIENCY RATING</span>
+            <span id="vic-rating" class="cell-value">S-RANK</span>
+          </div>
+          <div class="summary-cell">
+            <span class="cell-label">TIME ELAPSED</span>
+            <span id="vic-time" class="cell-value">00:00</span>
+          </div>
+          <div class="summary-cell">
+            <span class="cell-label">STRANDS WEAVED</span>
+            <span id="vic-strands" class="cell-value">0</span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-restart-vic" class="primary-btn pulse-glow">PLAY AGAIN (R)</button>
+          <button id="btn-quit-vic" class="secondary-btn">TITLE MENU</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Game Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
